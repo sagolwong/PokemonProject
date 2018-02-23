@@ -4,27 +4,29 @@ import java.util.Scanner;
 
 public class CommandPlayer {
     private PokemonCenter pokemonCenter;
+    private Backpack backpack;
     private Wild wild;
     private Scanner commandScanner;
     private boolean isRunning;
 
-    public CommandPlayer(PokemonCenter pokemonCenter,Wild wild){
+    public CommandPlayer(PokemonCenter pokemonCenter,Wild wild,Backpack backpack){
         this.pokemonCenter = pokemonCenter;
+        this.backpack = backpack;
         this.wild = wild;
         commandScanner = new Scanner(System.in);
         isRunning = false;
     }
     public  void runGame(){
         isRunning = true;
-        String want;
+        String wanting;
 
         while(isRunning){
             System.out.println("Where do you want to go?");
             System.out.print("<pokemoncenter,wild,quit> :");
-            want = commandScanner.next();
-            if(want.equals("pokemoncenter")) this.pokemonCenter();
-            else if(want.equals("wild")) this.wild();
-            else if(want.equals("quit")){
+            wanting = commandScanner.next();
+            if(wanting.equals("pokemoncenter")) this.pokemonCenter();
+            else if(wanting.equals("wild")) this.wild();
+            else if(wanting.equals("quit")){
                 isRunning = false;
                 System.out.print("Goodbye~~");
             }
@@ -37,12 +39,13 @@ public class CommandPlayer {
         String command1;
 
         while(isRunning1){
-            System.out.println("What do you want to do? catch wild pokemon or quit?");
-            System.out.println("<catch,quit>");
+            System.out.println("What do you want to do? catch wild pokemon or leave?");
+            System.out.print("<catch,list,leave> :");
             command1 = commandScanner.next();
 
-            if(command1.equals("catch")) this.catchPoke();
-            else if(command1.equals("quit")){
+            if(command1.equals("catch")) this.catchPokemon();
+            else if(command1.equals("list")) this.listWildPokemon();
+            else if(command1.equals("leave")){
                 isRunning1 = false;
                 System.out.println("~~~~~~~~~~~");
             }
@@ -55,15 +58,15 @@ public class CommandPlayer {
 
         System.out.println("Welcome to PokemonCenter");
         while(isRunning2){
-            System.out.print("What do you want?(add,list,feed,walk,exercise,quit):");
+            System.out.print("What do you want?(buy,list,feed,walk,exercise,leave):");
             command = commandScanner.next();
 
-            if(command.equals("quit")){
+            if(command.equals("leave")){
                 isRunning2 = false;
                 System.out.println("See you~~");
             }
-            else if(command.equals("add"))
-                this.addPokemon();
+            else if(command.equals("buy"))
+                this.buyPokemon();
             else if(command.equals("list"))
                 this.listPokemons();
             else if(command.equals("feed"))
@@ -75,59 +78,86 @@ public class CommandPlayer {
         }
     }
 
-    private void catchPoke(){
+    private void catchPokemon(){
         Random rand = new Random();
-        double pokeball = 0;
+        String type = "";
+        boolean run = true;
         boolean opportunity = false;
 
         int numOfPoke = rand.nextInt(3);
-        int numPokeball = rand.nextInt(3);
-        System.out.print("You get ");
-        if(numPokeball == 1){
-            System.out.println("PokeBall");
-            pokeball = 0.8;
-        }
-        else if(numPokeball == 2){
-            System.out.println("GreatBall");
-            pokeball = 0.9;
-        }
-        else if(numPokeball == 3) {
-            System.out.println("UltraBall");
-            pokeball = 1.0;
-        }
-        System.out.println("...Wait.a.minute...");
-        if(numOfPoke == 1){
+        System.out.println("...Finding Wild Pokemon...");
+        if(numOfPoke == 0){
+            System.out.println("----------------------------");
             System.out.println("You found Dragonair!!");
-            System.out.println(".....................");
-            opportunity = wild.catchPokemon(pokeball);
+            System.out.println("----------------------------");
+            type = "Dragonair";
+            opportunity = wild.catchPokemon();
+        }
+        else if(numOfPoke == 1){
+            System.out.println("----------------------------");
+            System.out.println("You found Magikarp!!");
+            System.out.println("----------------------------");
+            type = "Magikarp";
+            opportunity = wild.catchPokemon();
         }
         else if(numOfPoke == 2){
-            System.out.println("You found Magikarp!!");
-            System.out.println(".....................");
-            opportunity = wild.catchPokemon(pokeball);
-        }
-        else if(numOfPoke == 3){
+            System.out.println("----------------------------");
             System.out.println("You found Ponyta!!");
-            System.out.println(".....................");
-            opportunity = wild.catchPokemon(pokeball);
+            System.out.println("----------------------------");
+            type = "Ponyta";
+            opportunity = wild.catchPokemon();
         }
 
         if(opportunity){
-            System.out.print("What do you want to do with ");
-            if(numOfPoke == 1) System.out.println("Dragonair");
-            else if(numOfPoke == 2) System.out.println("Magikarp");
-            else if(numOfPoke == 3) System.out.println("Ponyta");
+            System.out.print("You get "+type+" ");
+            while(run){
+                System.out.print("<keep,release> :");
+                String wantto = commandScanner.next();
+                if(wantto.equals("keep")){
+                    System.out.print("Enter Name of "+type+" :");
+                    String name = commandScanner.next();
+                    float weight = 10f;
+                    float stepLength = 5f;
 
-            System.out.print("<keep,release>");
+                    if(type.equals("Dragonair")){
+                        Dragonair dragonair = new Dragonair(name, weight, stepLength);
+                        backpack.addPokemon(dragonair);
+                    }
+                    else if(type.equals("Magikarp")){
+                        Magikarp magikarp = new Magikarp(name,weight,stepLength);
+                        backpack.addPokemon(magikarp);
+                    }
+                    else if(type.equals("Ponyta")) {
+                        Ponyta ponyta = new Ponyta(name, weight, stepLength);
+                        backpack.addPokemon(ponyta);
+                    }
+                    run = false;
+                }
+                else if(wantto.equals("release")){
+                    System.out.println("=======================");
+                    System.out.println("Pokemon Escape!!");
+                    System.out.println("=======================");
+                    run = false;
+                }
+            }
+
 
         }
     }
 
-    private void addPokemon(){
+    private void listWildPokemon(){
+        System.out.println("==========================================");
+        System.out.println("Pokemon List (in backpack)");
+        System.out.println("==========================================");
+        this.backpack.list();
+        System.out.println("==========================================");
+    }
+
+    private void buyPokemon(){
         String pokemonType;
         String name;
 
-        System.out.println("What pokemon do you want to catch?");
+        System.out.println("What pokemon do you want to buy?");
         System.out.println("<Dragonair,Magikarp,Ponyta>: ");
         pokemonType = commandScanner.next();
         System.out.print("Name of "+pokemonType+" is ");
@@ -153,9 +183,14 @@ public class CommandPlayer {
 
     private void listPokemons(){
         System.out.println("==========================================");
-        System.out.println("Pokemon List");
+        System.out.println("Pokemon List (in farm)");
         System.out.println("==========================================");
         this.pokemonCenter.list();
+        System.out.println("==========================================");
+        System.out.println("==========================================");
+        System.out.println("Pokemon  List (in backpack)");
+        System.out.println("==========================================");
+        this.backpack.list();
         System.out.println("==========================================");
     }
 
